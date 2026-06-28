@@ -149,7 +149,7 @@
               <label for="hc-price">Home Price</label>
               <div class="hc-input-wrap">
                 <span class="hc-prefix">$</span>
-                <input type="number" id="hc-price" value="650000" min="100000" max="3000000" step="5000" />
+                <input type="text" id="hc-price" inputmode="numeric" value="650000" min="100000" max="3000000" step="5000" />
               </div>
             </div>
             <input type="range" class="hc-slider" id="hc-price-slider" min="100000" max="3000000" step="5000" value="650000" />
@@ -163,7 +163,7 @@
               <label for="hc-down">Down Payment</label>
               <div class="hc-input-wrap">
                 <span class="hc-prefix">$</span>
-                <input type="number" id="hc-down" value="130000" min="0" max="1500000" step="5000" />
+                <input type="text" id="hc-down" inputmode="numeric" value="130000" min="0" max="1500000" step="5000" />
               </div>
             </div>
             <input type="range" class="hc-slider" id="hc-down-slider" min="0" max="1500000" step="5000" value="130000" />
@@ -196,21 +196,21 @@
                 <label for="hc-tax">🏛 Property Tax / mo</label>
                 <div class="hc-input-wrap">
                   <span class="hc-prefix">$</span>
-                  <input type="number" id="hc-tax" value="600" min="0" max="10000" step="50" />
+                  <input type="text" id="hc-tax" inputmode="numeric" value="600" min="0" max="10000" step="50" />
                 </div>
               </div>
               <div class="hc-extra-field">
                 <label for="hc-insurance">🏠 Home Insurance / mo</label>
                 <div class="hc-input-wrap">
                   <span class="hc-prefix">$</span>
-                  <input type="number" id="hc-insurance" value="150" min="0" max="5000" step="25" />
+                  <input type="text" id="hc-insurance" inputmode="numeric" value="150" min="0" max="5000" step="25" />
                 </div>
               </div>
               <div class="hc-extra-field">
                 <label for="hc-hoa">🏢 HOA Fees / mo</label>
                 <div class="hc-input-wrap">
                   <span class="hc-prefix">$</span>
-                  <input type="number" id="hc-hoa" value="0" min="0" max="5000" step="25" />
+                  <input type="text" id="hc-hoa" inputmode="numeric" value="0" min="0" max="5000" step="25" />
                 </div>
               </div>
             </div>
@@ -318,7 +318,7 @@
         </div>
 
         <div class="hc-actions">
-          <a href="apply.html" class="btn btn-primary hc-cta">Apply For My Actual Rate →</a>
+          <a href="apply.html" class="btn btn-primary hc-cta">Get My Actual Rate from Carol →</a>
           <p class="hc-disclaimer">No credit pull · No obligation · Free consultation</p>
         </div>
 
@@ -698,13 +698,19 @@
     }
   }
 
+  function getVal(id) {
+    var el = document.getElementById(id);
+    if (!el) return 0;
+    return parseFloat(String(el.value).replace(/,/g, '')) || 0;
+  }
+
   function heroCalc() {
-    var price     = parseFloat(document.getElementById('hc-price')?.value)     || 0;
-    var down      = parseFloat(document.getElementById('hc-down')?.value)      || 0;
-    var rate      = parseFloat(document.getElementById('hc-rate')?.value)      || 0;
-    var tax       = parseFloat(document.getElementById('hc-tax')?.value)       || 0;
-    var insurance = parseFloat(document.getElementById('hc-insurance')?.value) || 0;
-    var hoa       = parseFloat(document.getElementById('hc-hoa')?.value)       || 0;
+    var price     = getVal('hc-price');
+    var down      = getVal('hc-down');
+    var rate      = parseFloat(document.getElementById('hc-rate')?.value) || 0;
+    var tax       = getVal('hc-tax');
+    var insurance = getVal('hc-insurance');
+    var hoa       = getVal('hc-hoa');
 
     var principal = Math.max(0, price - down);
     var mo = rate / 100 / 12;
@@ -769,15 +775,22 @@
     var slider = document.getElementById(sliderId);
     var input  = document.getElementById(inputId);
     if (!slider || !input) return;
-    slider.addEventListener('input', function() { input.value = slider.value; updateSliderFill(slider); heroCalc(); });
+    slider.addEventListener('input', function() {
+      input.value = Math.round(parseFloat(slider.value)).toLocaleString();
+      updateSliderFill(slider);
+      heroCalc();
+    });
   }
+
   function syncInputToSlider(inputId, sliderId) {
     var input  = document.getElementById(inputId);
     var slider = document.getElementById(sliderId);
     if (!input || !slider) return;
     input.addEventListener('input', function() {
-      var val = Math.min(Math.max(parseFloat(input.value) || 0, parseFloat(slider.min)), parseFloat(slider.max));
-      slider.value = val; updateSliderFill(slider); heroCalc();
+      var val = Math.min(Math.max(parseFloat(String(input.value).replace(/,/g,'')) || 0, parseFloat(slider.min)), parseFloat(slider.max));
+      slider.value = val;
+      updateSliderFill(slider);
+      heroCalc();
     });
   }
 
@@ -814,6 +827,30 @@
       if (target) target.classList.remove('hc-panel-hidden');
     });
   });
+
+  // Input comma formatting — show commas on blur, raw number on focus
+  function addCommaFormatting(inputId) {
+    var input = document.getElementById(inputId);
+    if (!input) return;
+
+    function formatVal(val) {
+      var num = parseFloat(String(val).replace(/,/g, '')) || 0;
+      return num === 0 ? '' : Math.round(num).toLocaleString();
+    }
+
+    // Format on load
+    if (input.value) input.value = formatVal(input.value);
+
+    input.addEventListener('focus', function() {
+      // Strip commas so user can type freely
+      input.value = String(input.value).replace(/,/g, '');
+    });
+    input.addEventListener('blur', function() {
+      input.value = formatVal(input.value);
+    });
+  }
+
+  ['hc-price', 'hc-down', 'hc-tax', 'hc-insurance', 'hc-hoa'].forEach(addCommaFormatting);
 
   // Init
   document.querySelectorAll('.hc-slider').forEach(updateSliderFill);
