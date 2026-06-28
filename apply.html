@@ -498,6 +498,33 @@
           </div>
         </div>
 
+        <div class="form-section">
+          <p class="form-section-title">Your Loan Officer</p>
+          <p style="font-size:0.85rem;color:var(--slate);margin-bottom:14px;">Select the loan officer you've been working with, or choose "Assign Me" and Carol will assign someone to help you.</p>
+          <div class="option-grid" id="lo-grid" style="grid-template-columns: repeat(2, 1fr);">
+            <div class="option-card selected" data-value="carol-nguyen">
+              <div class="option-card-icon">👩‍💼</div>
+              <div class="option-card-label">Carol Nguyen</div>
+              <div class="option-card-sub">Senior Loan Officer · NMLS #337277</div>
+            </div>
+            <div class="option-card" data-value="lauren-ho">
+              <div class="option-card-icon">👩‍💼</div>
+              <div class="option-card-label">Lauren Ho</div>
+              <div class="option-card-sub">Senior Loan Officer · NMLS #633492</div>
+            </div>
+            <div class="option-card" data-value="alexia-nguyen">
+              <div class="option-card-icon">👩‍💼</div>
+              <div class="option-card-label">Alexia Nguyen</div>
+              <div class="option-card-sub">Loan Officer · NMLS #362211</div>
+            </div>
+            <div class="option-card" data-value="assign">
+              <div class="option-card-icon">🤝</div>
+              <div class="option-card-label">Not Sure</div>
+              <div class="option-card-sub">We'll match you with someone</div>
+            </div>
+          </div>
+        </div>
+
         <div class="apply-nav">
           <div></div>
           <button class="btn-next" onclick="nextStep()">Next: Property Info →</button>
@@ -514,13 +541,7 @@
           <div class="form-field">
             <label>Property State <span class="req">*</span></label>
             <select id="prop-state">
-              <option value="">Select state</option>
               <option value="CA" selected>California</option>
-              <option value="AZ">Arizona</option>
-              <option value="NV">Nevada</option>
-              <option value="OR">Oregon</option>
-              <option value="WA">Washington</option>
-              <option value="other">Other</option>
             </select>
           </div>
           <div class="form-field">
@@ -667,12 +688,7 @@
             <div class="form-field">
               <label>State <span class="req">*</span></label>
               <select id="curr-state">
-                <option value="CA">CA</option>
-                <option value="AZ">AZ</option>
-                <option value="NV">NV</option>
-                <option value="OR">OR</option>
-                <option value="WA">WA</option>
-                <option value="other">Other</option>
+                <option value="CA" selected>CA</option>
               </select>
             </div>
             <div class="form-field">
@@ -866,6 +882,10 @@
         <div class="review-section">
           <p class="review-section-title">Loan Details</p>
           <div class="review-row">
+            <span class="review-label">Loan Officer</span>
+            <span class="review-value" id="rv-lo">—</span>
+          </div>
+          <div class="review-row">
             <span class="review-label">Purpose</span>
             <span class="review-value" id="rv-purpose">—</span>
           </div>
@@ -1019,6 +1039,7 @@
   }
   initOptionGrid('purpose-grid',  'purpose');
   initOptionGrid('loantype-grid', 'loanType');
+  initOptionGrid('lo-grid', 'loanOfficer');
 
   // ── TOGGLE BUTTONS ──
   function initToggleGroup(groupId, storeKey, onSelect) {
@@ -1081,9 +1102,16 @@
   function populateReview() {
     saveStepData();
     var purposeMap  = { purchase:'Purchase', refinance:'Refinance', cashout:'Cash-Out Refinance' };
-    var loantypeMap = { conventional:'Conventional', fha:'FHA', va:'VA', jumbo:'Jumbo', usda:'USDA', unsure:'Not sure (Carol will advise)' };
+    var loantypeMap = { conventional:'Conventional', fha:'FHA', va:'VA', jumbo:'Jumbo', usda:'USDA', unsure:'Not sure (we will advise)' };
+    var loMap = {
+      'carol-nguyen':  'Carol Nguyen (NMLS #337277)',
+      'lauren-ho':     'Lauren Ho (NMLS #633492)',
+      'alexia-nguyen': 'Alexia Nguyen (NMLS #362211)',
+      'assign':        'Not sure — please assign'
+    };
     var termMap     = { '30':'30-Year Fixed','20':'20-Year Fixed','15':'15-Year Fixed','10':'10-Year Fixed','arm':'5/1 ARM' };
 
+    setText('rv-lo',        loMap[formData.loanOfficer]    || formData.loanOfficer || '—');
     setText('rv-purpose',   purposeMap[formData.purpose]   || formData.purpose   || '—');
     setText('rv-loantype',  loantypeMap[formData.loanType] || formData.loanType  || '—');
     setText('rv-propvalue', fmtDollar(formData['prop-value']));
@@ -1110,21 +1138,87 @@
   }
 
   // ── SUBMIT ──
+  // Uses Formspree for email delivery (free, no backend needed)
+  // Sign up at formspree.io, create a form, and replace FORMSPREE_ID below
+  var FORMSPREE_ID = 'YOUR_FORMSPREE_ID'; // ← replace this
+
   window.submitForm = function() {
     saveStepData();
     var btn = document.getElementById('submit-btn');
     btn.textContent = 'Submitting...';
     btn.disabled = true;
 
-    // TODO: Replace this setTimeout with a real fetch() to your Python backend
-    // fetch('/api/apply', { method: 'POST', body: JSON.stringify(formData), headers: { 'Content-Type': 'application/json' } })
-    setTimeout(function() {
-      document.querySelector('.apply-card').style.display = 'none';
-      document.getElementById('apply-success').classList.add('active');
-      document.querySelector('.apply-header').style.display = 'none';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 800);
+    var loNames = {
+      'carol-nguyen':  'Carol Nguyen (NMLS #337277) — carol.nguyen@libertybell-loans.com',
+      'lauren-ho':     'Lauren Ho (NMLS #633492) — lauren.ho@libertybell-loans.com',
+      'alexia-nguyen': 'Alexia Nguyen (NMLS #362211) — alexia.nguyen@libertybell-loans.com',
+      'assign':        'Unassigned — please match me with a loan officer'
+    };
+
+    var payload = {
+      // Routing info
+      loan_officer:   loNames[formData.loanOfficer] || formData.loanOfficer || 'Unspecified',
+      // Loan details
+      purpose:        formData.purpose,
+      loan_type:      formData.loanType,
+      loan_term:      formData['loan-term'],
+      property_value: formData['prop-value'],
+      down_payment:   formData['down-payment'],
+      loan_amount:    formData['loan-amount'],
+      property_zip:   formData['prop-zip'],
+      property_type:  formData['prop-type'],
+      property_use:   formData['prop-use'],
+      // Borrower
+      first_name:     formData['first-name'],
+      last_name:      formData['last-name'],
+      email:          formData['email'],
+      phone:          formData['phone'],
+      dob:            formData['dob'],
+      address:        [formData['curr-address'], formData['curr-city'], formData['curr-state'], formData['curr-zip']].filter(Boolean).join(', '),
+      co_borrower:    formData.coBorrower,
+      co_name:        [formData['co-first-name'], formData['co-last-name']].filter(Boolean).join(' '),
+      // Employment
+      emp_status:     formData['emp-status'],
+      employer:       formData['employer-name'],
+      job_title:      formData['job-title'],
+      monthly_income: formData['monthly-income'],
+      other_income:   formData['other-income'],
+      credit_score:   formData['credit-score'],
+      monthly_debts:  formData['monthly-debts'],
+      bank_assets:    formData['bank-assets'],
+      invest_assets:  formData['invest-assets'],
+      notes:          formData['notes'],
+      _subject:       'New Loan Application — ' + (formData['first-name'] || '') + ' ' + (formData['last-name'] || '') + ' (' + (loNames[formData.loanOfficer] || 'Unassigned') + ')',
+    };
+
+    // If Formspree ID not set yet, just show success (dev mode)
+    if (FORMSPREE_ID === 'YOUR_FORMSPREE_ID') {
+      console.log('Form data (dev mode):', payload);
+      showSuccess();
+      return;
+    }
+
+    fetch('https://formspree.io/f/' + FORMSPREE_ID, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(function(res) {
+      if (res.ok) { showSuccess(); }
+      else { btn.textContent = 'Error — please try again'; btn.disabled = false; }
+    })
+    .catch(function() {
+      btn.textContent = 'Error — please try again';
+      btn.disabled = false;
+    });
   };
+
+  function showSuccess() {
+    document.querySelector('.apply-card').style.display = 'none';
+    document.getElementById('apply-success').classList.add('active');
+    document.querySelector('.apply-header').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
 })();
 </script>
