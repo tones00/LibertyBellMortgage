@@ -137,4 +137,28 @@ document.addEventListener('DOMContentLoaded', function () {
     revealEls.forEach(function(el) { el.classList.add('revealed'); });
   }
 
+
+  // --- TEAM CAROUSEL ---
+  var teamCurrent = 0;
+  var teamSlides = document.querySelectorAll('.team-slide');
+  var teamDots   = document.querySelectorAll('.team-dot');
+  var teamTotal  = teamSlides.length;
+
+  function goToSlide(n) {
+    teamSlides[teamCurrent].classList.remove('active');
+    teamDots[teamCurrent].classList.remove('active');
+    teamCurrent = (n + teamTotal) % teamTotal;
+    teamSlides[teamCurrent].classList.add('active');
+    teamDots[teamCurrent].classList.add('active');
+  }
+
+  var prevBtn = document.getElementById('team-prev');
+  var nextBtn = document.getElementById('team-next');
+  if (prevBtn) prevBtn.addEventListener('click', function() { goToSlide(teamCurrent - 1); });
+  if (nextBtn) nextBtn.addEventListener('click', function() { goToSlide(teamCurrent + 1); });
+
+  teamDots.forEach(function(dot) {
+    dot.addEventListener('click', function() { goToSlide(parseInt(dot.dataset.index)); });
+  });
+
 }); // end DOMContentLoaded
