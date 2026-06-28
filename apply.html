@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apply for a Loan | Liberty Bell Mortgage</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ── APPLY PAGE STYLES ── */
+    .apply-wrap {
+      min-height: 100vh;
+      background: #f7f5f0;
+      padding-top: 72px;
+    }
+
+    /* Progress header */
+    .apply-header {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 0;
+      position: sticky;
+      top: 72px;
+      z-index: 10;
+    }
+    .apply-header-inner {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    .apply-progress-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .apply-progress-label span {
+      font-size: 0.78rem;
+      color: var(--slate-light);
+    }
+    .apply-progress-label strong {
+      font-size: 0.85rem;
+      color: var(--navy);
+    }
+    .apply-progress-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+    .apply-progress-fill {
+      height: 100%;
+      background: var(--navy);
+      border-radius: 100px;
+      transition: width 0.4s ease;
+      width: 20%;
+    }
+    .apply-steps-dots {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .apply-dot {
+      flex: 1;
+      height: 3px;
+      border-radius: 100px;
+      background: var(--border);
+      transition: background 0.3s;
+    }
+    .apply-dot.active { background: var(--navy); }
+    .apply-dot.done   { background: var(--gold-light); }
+
+    /* Main card */
+    .apply-body {
+      max-width: 760px;
+      margin: 32px auto;
+      padding: 0 24px 80px;
+    }
+    .apply-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 40px 48px;
+      box-shadow: var(--shadow-md);
+    }
+    .apply-step { display: none; }
+    .apply-step.active { display: block; }
+
+    .apply-step-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--navy);
+      margin-bottom: 6px;
+    }
+    .apply-step-title {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 6px;
+    }
+    .apply-step-sub {
+      font-size: 0.9rem;
+      color: var(--slate);
+      margin-bottom: 32px;
+    }
+
+    /* Form fields */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .form-row.full { grid-template-columns: 1fr; }
+    .form-row.thirds { grid-template-columns: 1fr 1fr 1fr; }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-field label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--slate);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .form-field label .req { color: #e53e3e; margin-left: 2px; }
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-body);
+      font-size: 0.92rem;
+      color: var(--navy);
+      background: var(--white);
+      transition: border-color var(--transition), box-shadow var(--transition);
+      appearance: none;
+    }
+    .form-field input:focus,
+    .form-field select:focus,
+    .form-field textarea:focus {
+      outline: none;
+      border-color: var(--navy);
+      box-shadow: 0 0 0 3px rgba(0,128,128,0.1);
+    }
+    .form-field textarea { resize: vertical; min-height: 80px; }
+    .form-field .input-hint {
+      font-size: 0.72rem;
+      color: var(--slate-light);
+    }
+
+    /* Input with prefix */
+    .input-prefix-wrap {
+      position: relative;
+    }
+    .input-prefix-wrap .prefix {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.9rem;
+      color: var(--slate-light);
+      pointer-events: none;
+    }
+    .input-prefix-wrap .suffix {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.9rem;
+      color: var(--slate-light);
+      pointer-events: none;
+    }
+    .input-prefix-wrap input { padding-left: 26px; }
+    .input-prefix-wrap.has-suffix input { padding-right: 36px; }
+
+    /* Section divider */
+    .form-section {
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+    .form-section-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--navy);
+      margin-bottom: 16px;
+    }
+
+    /* Option cards (loan type selector) */
+    .option-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .option-card {
+      border: 2px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 14px;
+      cursor: pointer;
+      transition: all var(--transition);
+      text-align: center;
+      background: var(--white);
+    }
+    .option-card:hover {
+      border-color: var(--navy);
+      background: var(--gold-pale);
+    }
+    .option-card.selected {
+      border-color: var(--navy);
+      background: var(--gold-pale);
+      box-shadow: 0 0 0 3px rgba(0,128,128,0.1);
+    }
+    .option-card-icon { font-size: 1.5rem; margin-bottom: 6px; }
+    .option-card-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--navy);
+    }
+    .option-card-sub {
+      font-size: 0.68rem;
+      color: var(--slate-light);
+      margin-top: 2px;
+    }
+
+    /* Yes/No toggle */
+    .toggle-group {
+      display: flex;
+      gap: 10px;
+    }
+    .toggle-btn {
+      flex: 1;
+      padding: 10px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--white);
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--slate);
+      cursor: pointer;
+      transition: all var(--transition);
+      text-align: center;
+    }
+    .toggle-btn.selected {
+      border-color: var(--navy);
+      background: var(--gold-pale);
+      color: var(--navy);
+    }
+
+    /* Navigation buttons */
+    .apply-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 36px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      gap: 12px;
+    }
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 20px;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--slate);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .btn-back:hover {
+      border-color: var(--slate);
+      color: var(--navy);
+    }
+    .btn-next {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 28px;
+      background: var(--navy);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-body);
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--white);
+      cursor: pointer;
+      transition: all var(--transition);
+      margin-left: auto;
+    }
+    .btn-next:hover {
+      background: var(--navy-mid);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(0,128,128,0.3);
+    }
+
+    /* Step 5 — Review summary */
+    .review-section {
+      background: var(--cream);
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      margin-bottom: 16px;
+    }
+    .review-section-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--navy);
+      margin-bottom: 12px;
+    }
+    .review-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 5px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+    .review-row:last-child { border-bottom: none; }
+    .review-label { color: var(--slate); }
+    .review-value { font-weight: 600; color: var(--navy); text-align: right; }
+
+    /* Success state */
+    .apply-success {
+      display: none;
+      text-align: center;
+      padding: 48px 24px;
+    }
+    .apply-success.active { display: block; }
+    .success-icon {
+      width: 72px;
+      height: 72px;
+      background: var(--gold-pale);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin: 0 auto 20px;
+    }
+    .success-title {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 10px;
+    }
+    .success-sub {
+      font-size: 1rem;
+      color: var(--slate);
+      max-width: 400px;
+      margin: 0 auto 28px;
+      line-height: 1.7;
+    }
+
+    /* Disclosure */
+    .apply-disclosure {
+      font-size: 0.72rem;
+      color: var(--slate-light);
+      text-align: center;
+      margin-top: 20px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 700px) {
+      .apply-card { padding: 24px 20px; }
+      .form-row { grid-template-columns: 1fr; }
+      .form-row.thirds { grid-template-columns: 1fr; }
+      .option-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 420px) {
+      .option-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav scrolled" role="navigation">
+  <div class="container nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-text">
+        <strong>Liberty Bell</strong>
+        <span>Mortgage</span>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html#how-it-works">How It Works</a></li>
+      <li><a href="index.html#loan-types">Loan Types</a></li>
+      <li><a href="index.html#hero-calc">Calculator</a></li>
+      <li><a href="index.html#about">About Carol</a></li>
+      <li><a href="index.html#reviews">Reviews</a></li>
+    </ul>
+    <a href="tel:4083736534" class="btn nav-cta" style="background:var(--navy);color:var(--white);border-color:var(--white);border-width:1.5px;">📞 (408) 373-6534</a>
+    <button class="nav-hamburger" aria-label="Open navigation menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="apply-wrap">
+
+  <!-- PROGRESS HEADER -->
+  <div class="apply-header">
+    <div class="apply-header-inner">
+      <div class="apply-progress-label">
+        <span id="step-label">Step 1 of 5</span>
+        <strong id="step-name">Loan Type</strong>
+      </div>
+      <div class="apply-progress-bar">
+        <div class="apply-progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="apply-steps-dots">
+        <div class="apply-dot active" id="dot-1"></div>
+        <div class="apply-dot" id="dot-2"></div>
+        <div class="apply-dot" id="dot-3"></div>
+        <div class="apply-dot" id="dot-4"></div>
+        <div class="apply-dot" id="dot-5"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="apply-body">
+    <div class="apply-card">
+
+      <!-- ══ STEP 1: LOAN TYPE ══ -->
+      <div class="apply-step active" id="step-1">
+        <p class="apply-step-label">Step 1 of 5</p>
+        <h1 class="apply-step-title">What are you looking for?</h1>
+        <p class="apply-step-sub">Select the option that best describes your situation.</p>
+
+        <div class="option-grid" id="purpose-grid">
+          <div class="option-card selected" data-value="purchase">
+            <div class="option-card-icon">🏡</div>
+            <div class="option-card-label">Purchase</div>
+            <div class="option-card-sub">Buying a home</div>
+          </div>
+          <div class="option-card" data-value="refinance">
+            <div class="option-card-icon">🔄</div>
+            <div class="option-card-label">Refinance</div>
+            <div class="option-card-sub">Lower my rate</div>
+          </div>
+          <div class="option-card" data-value="cashout">
+            <div class="option-card-icon">💵</div>
+            <div class="option-card-label">Cash-Out</div>
+            <div class="option-card-sub">Access equity</div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <p class="form-section-title">Loan Program</p>
+          <div class="option-grid" id="loantype-grid">
+            <div class="option-card selected" data-value="conventional">
+              <div class="option-card-icon">🏦</div>
+              <div class="option-card-label">Conventional</div>
+              <div class="option-card-sub">Good credit</div>
+            </div>
+            <div class="option-card" data-value="fha">
+              <div class="option-card-icon">🇺🇸</div>
+              <div class="option-card-label">FHA</div>
+              <div class="option-card-sub">Low down payment</div>
+            </div>
+            <div class="option-card" data-value="va">
+              <div class="option-card-icon">⭐</div>
+              <div class="option-card-label">VA</div>
+              <div class="option-card-sub">Veterans & military</div>
+            </div>
+            <div class="option-card" data-value="jumbo">
+              <div class="option-card-icon">💎</div>
+              <div class="option-card-label">Jumbo</div>
+              <div class="option-card-sub">High-value homes</div>
+            </div>
+            <div class="option-card" data-value="usda">
+              <div class="option-card-icon">🌾</div>
+              <div class="option-card-label">USDA</div>
+              <div class="option-card-sub">Rural properties</div>
+            </div>
+            <div class="option-card" data-value="unsure">
+              <div class="option-card-icon">🤔</div>
+              <div class="option-card-label">Not Sure</div>
+              <div class="option-card-sub">Carol will advise</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="apply-nav">
+          <div></div>
+          <button class="btn-next" onclick="nextStep()">Next: Property Info →</button>
+        </div>
+      </div>
+
+      <!-- ══ STEP 2: PROPERTY & LOAN DETAILS ══ -->
+      <div class="apply-step" id="step-2">
+        <p class="apply-step-label">Step 2 of 5</p>
+        <h2 class="apply-step-title">Property & Loan Details</h2>
+        <p class="apply-step-sub">Tell us about the property and how much you need.</p>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label>Property State <span class="req">*</span></label>
+            <select id="prop-state">
+              <option value="">Select state</option>
+              <option value="CA" selected>California</option>
+              <option value="AZ">Arizona</option>
+              <option value="NV">Nevada</option>
+              <option value="OR">Oregon</option>
+              <option value="WA">Washington</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Property ZIP Code <span class="req">*</span></label>
+            <input type="text" id="prop-zip" placeholder="95148" maxlength="5" inputmode="numeric" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label>Property Type <span class="req">*</span></label>
+            <select id="prop-type">
+              <option value="">Select type</option>
+              <option value="single-family">Single Family Home</option>
+              <option value="condo">Condo / Townhouse</option>
+              <option value="multi-family">Multi-Family (2–4 units)</option>
+              <option value="manufactured">Manufactured Home</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Property Use <span class="req">*</span></label>
+            <select id="prop-use">
+              <option value="">Select use</option>
+              <option value="primary">Primary Residence</option>
+              <option value="second">Second Home</option>
+              <option value="investment">Investment Property</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label>Purchase Price / Property Value <span class="req">*</span></label>
+            <div class="input-prefix-wrap">
+              <span class="prefix">$</span>
+              <input type="text" id="prop-value" placeholder="650,000" inputmode="numeric" />
+            </div>
+          </div>
+          <div class="form-field">
+            <label>Down Payment / Equity <span class="req">*</span></label>
+            <div class="input-prefix-wrap">
+              <span class="prefix">$</span>
+              <input type="text" id="down-payment" placeholder="130,000" inputmode="numeric" />
+            </div>
+            <span class="input-hint" id="dp-pct-hint"></span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label>Loan Amount</label>
+            <div class="input-prefix-wrap">
+              <span class="prefix">$</span>
+              <input type="text" id="loan-amount" placeholder="Auto-calculated" readonly style="background:var(--cream);color:var(--slate);" />
+            </div>
+          </div>
+          <div class="form-field">
+            <label>Desired Loan Term</label>
+            <select id="loan-term">
+              <option value="30">30-Year Fixed</option>
+              <option value="20">20-Year Fixed</option>
+              <option value="15">15-Year Fixed</option>
+              <option value="10">10-Year Fixed</option>
+              <option value="arm">5/1 ARM</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="apply-nav">
+          <button class="btn-back" onclick="prevStep()">← Back</button>
+          <button class="btn-next" onclick="nextStep()">Next: Your Info →</button>
+        </div>
+      </div>
+
+      <!-- ══ STEP 3: BORROWER INFO ══ -->
+      <div class="apply-step" id="step-3">
+        <p class="apply-step-label">Step 3 of 5</p>
+        <h2 class="apply-step-title">About You</h2>
+        <p class="apply-step-sub">Your personal information is encrypted and never shared without your consent.</p>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label>First Name <span class="req">*</span></label>
+            <input type="text" id="first-name" placeholder="Jane" />
+          </div>
+          <div class="form-field">
+            <label>Last Name <span class="req">*</span></label>
+            <input type="text" id="last-name" placeholder="Smith" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label>Email Address <span class="req">*</span></label>
+            <input type="email" id="email" placeholder="jane@example.com" />
+          </div>
+          <div class="form-field">
+            <label>Phone Number <span class="req">*</span></label>
+            <input type="tel" id="phone" placeholder="(408) 555-0123" />
+          </div>
+        </div>
+
+        <div class="form-row thirds">
+          <div class="form-field">
+            <label>Date of Birth <span class="req">*</span></label>
+            <input type="date" id="dob" />
+          </div>
+          <div class="form-field">
+            <label>Marital Status</label>
+            <select id="marital-status">
+              <option value="">Select</option>
+              <option value="single">Single</option>
+              <option value="married">Married</option>
+              <option value="separated">Separated</option>
+              <option value="divorced">Divorced</option>
+              <option value="widowed">Widowed</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Dependents</label>
+            <select id="dependents">
+              <option value="0">0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4+">4 or more</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <p class="form-section-title">Current Address</p>
+          <div class="form-row full">
+            <div class="form-field">
+              <label>Street Address <span class="req">*</span></label>
+              <input type="text" id="curr-address" placeholder="123 Main Street" />
+            </div>
+          </div>
+          <div class="form-row thirds">
+            <div class="form-field">
+              <label>City <span class="req">*</span></label>
+              <input type="text" id="curr-city" placeholder="San Jose" />
+            </div>
+            <div class="form-field">
+              <label>State <span class="req">*</span></label>
+              <select id="curr-state">
+                <option value="CA">CA</option>
+                <option value="AZ">AZ</option>
+                <option value="NV">NV</option>
+                <option value="OR">OR</option>
+                <option value="WA">WA</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>ZIP <span class="req">*</span></label>
+              <input type="text" id="curr-zip" placeholder="95148" maxlength="5" inputmode="numeric" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label>Years at Address</label>
+              <select id="years-address">
+                <option value="0-1">Less than 1 year</option>
+                <option value="1-2">1–2 years</option>
+                <option value="2-5">2–5 years</option>
+                <option value="5+">5+ years</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Housing Status</label>
+              <select id="housing-status">
+                <option value="rent">Renting</option>
+                <option value="own">Own</option>
+                <option value="family">Living with family</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <p class="form-section-title">Co-Borrower</p>
+          <div class="form-field" style="margin-bottom:12px;">
+            <label>Are you applying with a co-borrower?</label>
+            <div class="toggle-group" id="coborrower-toggle">
+              <button class="toggle-btn" data-value="yes">Yes</button>
+              <button class="toggle-btn selected" data-value="no">No</button>
+            </div>
+          </div>
+          <div id="coborrower-fields" style="display:none;">
+            <div class="form-row">
+              <div class="form-field">
+                <label>Co-Borrower First Name</label>
+                <input type="text" id="co-first-name" placeholder="John" />
+              </div>
+              <div class="form-field">
+                <label>Co-Borrower Last Name</label>
+                <input type="text" id="co-last-name" placeholder="Smith" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-field">
+                <label>Co-Borrower Email</label>
+                <input type="email" id="co-email" placeholder="john@example.com" />
+              </div>
+              <div class="form-field">
+                <label>Co-Borrower Phone</label>
+                <input type="tel" id="co-phone" placeholder="(408) 555-0124" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="apply-nav">
+          <button class="btn-back" onclick="prevStep()">← Back</button>
+          <button class="btn-next" onclick="nextStep()">Next: Employment →</button>
+        </div>
+      </div>
+
+      <!-- ══ STEP 4: EMPLOYMENT & FINANCES ══ -->
+      <div class="apply-step" id="step-4">
+        <p class="apply-step-label">Step 4 of 5</p>
+        <h2 class="apply-step-title">Employment & Finances</h2>
+        <p class="apply-step-sub">This helps us determine which loan programs you qualify for.</p>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label>Employment Status <span class="req">*</span></label>
+            <select id="emp-status" onchange="toggleEmpFields()">
+              <option value="">Select</option>
+              <option value="employed">Employed (W-2)</option>
+              <option value="self-employed">Self-Employed</option>
+              <option value="retired">Retired</option>
+              <option value="military">Active Military</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Years in Current Job</label>
+            <select id="emp-years">
+              <option value="0-1">Less than 1 year</option>
+              <option value="1-2">1–2 years</option>
+              <option value="2-5">2–5 years</option>
+              <option value="5+">5+ years</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="employer-fields">
+          <div class="form-row">
+            <div class="form-field">
+              <label>Employer Name</label>
+              <input type="text" id="employer-name" placeholder="Acme Corporation" />
+            </div>
+            <div class="form-field">
+              <label>Job Title</label>
+              <input type="text" id="job-title" placeholder="Software Engineer" />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label>Gross Monthly Income <span class="req">*</span></label>
+            <div class="input-prefix-wrap">
+              <span class="prefix">$</span>
+              <input type="text" id="monthly-income" placeholder="8,500" inputmode="numeric" />
+            </div>
+            <span class="input-hint">Before taxes, all sources</span>
+          </div>
+          <div class="form-field">
+            <label>Additional Monthly Income</label>
+            <div class="input-prefix-wrap">
+              <span class="prefix">$</span>
+              <input type="text" id="other-income" placeholder="0" inputmode="numeric" />
+            </div>
+            <span class="input-hint">Rental, alimony, investments, etc.</span>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <p class="form-section-title">Credit & Existing Debts</p>
+          <div class="form-row">
+            <div class="form-field">
+              <label>Estimated Credit Score <span class="req">*</span></label>
+              <select id="credit-score">
+                <option value="">Select range</option>
+                <option value="760+">760+ (Excellent)</option>
+                <option value="740-759">740–759 (Very Good)</option>
+                <option value="720-739">720–739 (Good)</option>
+                <option value="700-719">700–719 (Good)</option>
+                <option value="680-699">680–699 (Fair)</option>
+                <option value="660-679">660–679 (Fair)</option>
+                <option value="640-659">640–659 (Below Average)</option>
+                <option value="620-639">620–639 (Below Average)</option>
+                <option value="<620">Below 620</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Monthly Debt Payments</label>
+              <div class="input-prefix-wrap">
+                <span class="prefix">$</span>
+                <input type="text" id="monthly-debts" placeholder="500" inputmode="numeric" />
+              </div>
+              <span class="input-hint">Car, student loans, credit cards (min payments)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <p class="form-section-title">Assets</p>
+          <div class="form-row">
+            <div class="form-field">
+              <label>Checking / Savings Balance</label>
+              <div class="input-prefix-wrap">
+                <span class="prefix">$</span>
+                <input type="text" id="bank-assets" placeholder="50,000" inputmode="numeric" />
+              </div>
+            </div>
+            <div class="form-field">
+              <label>Retirement / Investment Accounts</label>
+              <div class="input-prefix-wrap">
+                <span class="prefix">$</span>
+                <input type="text" id="invest-assets" placeholder="100,000" inputmode="numeric" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="apply-nav">
+          <button class="btn-back" onclick="prevStep()">← Back</button>
+          <button class="btn-next" onclick="nextStep()">Next: Review →</button>
+        </div>
+      </div>
+
+      <!-- ══ STEP 5: REVIEW & SUBMIT ══ -->
+      <div class="apply-step" id="step-5">
+        <p class="apply-step-label">Step 5 of 5</p>
+        <h2 class="apply-step-title">Review & Submit</h2>
+        <p class="apply-step-sub">Please review your information before submitting. Carol will contact you within one business day.</p>
+
+        <div class="review-section">
+          <p class="review-section-title">Loan Details</p>
+          <div class="review-row">
+            <span class="review-label">Purpose</span>
+            <span class="review-value" id="rv-purpose">—</span>
+          </div>
+          <div class="review-row">
+            <span class="review-label">Loan Program</span>
+            <span class="review-value" id="rv-loantype">—</span>
+          </div>
+          <div class="review-row">
+            <span class="review-label">Property Value</span>
+            <span class="review-value" id="rv-propvalue">—</span>
+          </div>
+          <div class="review-row">
+            <span class="review-label">Loan Amount</span>
+            <span class="review-value" id="rv-loanamt">—</span>
+          </div>
+          <div class="review-row">
+            <span class="review-label">Property ZIP</span>
+            <span class="review-value" id="rv-zip">—</span>
+          </div>
+          <div class="review-row">
+            <span class="review-label">Loan Term</span>
+            <span class="review-value" id="rv-term">—</span>
+          </div>
+        </div>
+
+        <div class="review-section">
+          <p class="review-section-title">Borrower</p>
+          <div class="review-row">
+            <span class="review-label">Name</span>
+            <span class="review-value" id="rv-name">—</span>
+          </div>
+          <div class="review-row">
+            <span class="review-label">Email</span>
+            <span class="review-value" id="rv-email">—</span>
+          </div>
+          <div class="review-row">
+            <span class="review-label">Phone</span>
+            <span class="review-value" id="rv-phone">—</span>
+          </div>
+          <div class="review-row">
+            <span class="review-label">Current Address</span>
+            <span class="review-value" id="rv-address">—</span>
+          </div>
+        </div>
+
+        <div class="review-section">
+          <p class="review-section-title">Employment & Finances</p>
+          <div class="review-row">
+            <span class="review-label">Employment</span>
+            <span class="review-value" id="rv-emp">—</span>
+          </div>
+          <div class="review-row">
+            <span class="review-label">Monthly Income</span>
+            <span class="review-value" id="rv-income">—</span>
+          </div>
+          <div class="review-row">
+            <span class="review-label">Credit Score</span>
+            <span class="review-value" id="rv-credit">—</span>
+          </div>
+          <div class="review-row">
+            <span class="review-label">Monthly Debts</span>
+            <span class="review-value" id="rv-debts">—</span>
+          </div>
+        </div>
+
+        <div class="form-field" style="margin-top:16px;">
+          <label>Additional Notes for Carol</label>
+          <textarea id="notes" placeholder="Anything else you'd like Carol to know about your situation..."></textarea>
+        </div>
+
+        <div class="apply-nav">
+          <button class="btn-back" onclick="prevStep()">← Back</button>
+          <button class="btn-next" id="submit-btn" onclick="submitForm()">Submit Application ✓</button>
+        </div>
+
+        <p class="apply-disclosure">
+          By submitting this application you consent to being contacted by Liberty Bell Mortgage regarding your loan inquiry.
+          Your information is encrypted and will not be sold to third parties.
+          This is not a loan commitment or approval. NMLS #337503 · DRE #01848265 · Equal Housing Opportunity.
+        </p>
+      </div>
+
+      <!-- ══ SUCCESS ══ -->
+      <div class="apply-success" id="apply-success">
+        <div class="success-icon">✓</div>
+        <h2 class="success-title">Application Received!</h2>
+        <p class="success-sub">
+          Thank you — Carol will review your information and reach out within one business day to discuss your options and next steps.
+        </p>
+        <a href="tel:4083736534" class="btn btn-primary" style="display:inline-flex;margin:0 auto 12px;">📞 Call Carol Now: (408) 373-6534</a>
+        <br/>
+        <a href="index.html" style="font-size:0.85rem;color:var(--slate-light);">← Back to Home</a>
+      </div>
+
+    </div><!-- /.apply-card -->
+  </div><!-- /.apply-body -->
+</div><!-- /.apply-wrap -->
+
+<script>
+(function() {
+  var currentStep = 1;
+  var totalSteps  = 5;
+  var formData    = {};
+
+  var stepNames = ['Loan Type', 'Property Info', 'Your Info', 'Employment', 'Review'];
+
+  // ── STEP NAVIGATION ──
+  window.nextStep = function() {
+    if (currentStep < totalSteps) {
+      saveStepData();
+      if (currentStep === totalSteps - 1) populateReview();
+      goToStep(currentStep + 1);
+    }
+  };
+  window.prevStep = function() {
+    if (currentStep > 1) goToStep(currentStep - 1);
+  };
+
+  function goToStep(n) {
+    document.getElementById('step-' + currentStep).classList.remove('active');
+    currentStep = n;
+    document.getElementById('step-' + currentStep).classList.add('active');
+    updateProgress();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function updateProgress() {
+    document.getElementById('step-label').textContent = 'Step ' + currentStep + ' of ' + totalSteps;
+    document.getElementById('step-name').textContent  = stepNames[currentStep - 1];
+    document.getElementById('progress-fill').style.width = (currentStep / totalSteps * 100) + '%';
+    for (var i = 1; i <= totalSteps; i++) {
+      var dot = document.getElementById('dot-' + i);
+      dot.className = 'apply-dot' + (i < currentStep ? ' done' : i === currentStep ? ' active' : '');
+    }
+  }
+
+  // ── OPTION CARD SELECTION ──
+  function initOptionGrid(gridId, storeKey) {
+    var grid = document.getElementById(gridId);
+    if (!grid) return;
+    grid.querySelectorAll('.option-card').forEach(function(card) {
+      card.addEventListener('click', function() {
+        grid.querySelectorAll('.option-card').forEach(function(c) { c.classList.remove('selected'); });
+        card.classList.add('selected');
+        formData[storeKey] = card.dataset.value;
+      });
+    });
+    // Set default
+    var selected = grid.querySelector('.option-card.selected');
+    if (selected) formData[storeKey] = selected.dataset.value;
+  }
+  initOptionGrid('purpose-grid',  'purpose');
+  initOptionGrid('loantype-grid', 'loanType');
+
+  // ── TOGGLE BUTTONS ──
+  function initToggleGroup(groupId, storeKey, onSelect) {
+    var group = document.getElementById(groupId);
+    if (!group) return;
+    group.querySelectorAll('.toggle-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        group.querySelectorAll('.toggle-btn').forEach(function(b) { b.classList.remove('selected'); });
+        btn.classList.add('selected');
+        formData[storeKey] = btn.dataset.value;
+        if (onSelect) onSelect(btn.dataset.value);
+      });
+    });
+  }
+  initToggleGroup('coborrower-toggle', 'coBorrower', function(val) {
+    document.getElementById('coborrower-fields').style.display = val === 'yes' ? 'block' : 'none';
+  });
+
+  // ── LOAN AMOUNT AUTO-CALC ──
+  function calcLoanAmount() {
+    var pv = parseFloat(String(document.getElementById('prop-value')?.value  || '').replace(/,/g,'')) || 0;
+    var dp = parseFloat(String(document.getElementById('down-payment')?.value || '').replace(/,/g,'')) || 0;
+    var loan = Math.max(0, pv - dp);
+    var laEl = document.getElementById('loan-amount');
+    if (laEl) laEl.value = loan > 0 ? '$' + loan.toLocaleString() : '';
+    var hint = document.getElementById('dp-pct-hint');
+    if (hint && pv > 0 && dp > 0) {
+      var pct = Math.round((dp / pv) * 100);
+      hint.textContent = pct + '% down payment';
+      hint.style.color = pct < 20 ? '#e53e3e' : 'var(--slate-light)';
+    } else if (hint) { hint.textContent = ''; }
+  }
+  ['prop-value','down-payment'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('input', calcLoanAmount);
+  });
+
+  // ── EMPLOYER FIELDS TOGGLE ──
+  window.toggleEmpFields = function() {
+    var status = document.getElementById('emp-status').value;
+    var fields = document.getElementById('employer-fields');
+    fields.style.display = (status === 'retired') ? 'none' : 'block';
+  };
+
+  // ── SAVE STEP DATA ──
+  function saveStepData() {
+    var fields = ['prop-state','prop-zip','prop-type','prop-use','prop-value','down-payment',
+                  'loan-amount','loan-term','first-name','last-name','email','phone','dob',
+                  'marital-status','dependents','curr-address','curr-city','curr-state','curr-zip',
+                  'years-address','housing-status','co-first-name','co-last-name','co-email','co-phone',
+                  'emp-status','emp-years','employer-name','job-title','monthly-income','other-income',
+                  'credit-score','monthly-debts','bank-assets','invest-assets','notes'];
+    fields.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) formData[id] = el.value;
+    });
+  }
+
+  // ── POPULATE REVIEW ──
+  function populateReview() {
+    saveStepData();
+    var purposeMap  = { purchase:'Purchase', refinance:'Refinance', cashout:'Cash-Out Refinance' };
+    var loantypeMap = { conventional:'Conventional', fha:'FHA', va:'VA', jumbo:'Jumbo', usda:'USDA', unsure:'Not sure (Carol will advise)' };
+    var termMap     = { '30':'30-Year Fixed','20':'20-Year Fixed','15':'15-Year Fixed','10':'10-Year Fixed','arm':'5/1 ARM' };
+
+    setText('rv-purpose',   purposeMap[formData.purpose]   || formData.purpose   || '—');
+    setText('rv-loantype',  loantypeMap[formData.loanType] || formData.loanType  || '—');
+    setText('rv-propvalue', fmtDollar(formData['prop-value']));
+    setText('rv-loanamt',   formData['loan-amount'] || '—');
+    setText('rv-zip',       formData['prop-zip']    || '—');
+    setText('rv-term',      termMap[formData['loan-term']] || formData['loan-term'] || '—');
+    setText('rv-name',      (formData['first-name'] || '') + ' ' + (formData['last-name'] || '') || '—');
+    setText('rv-email',     formData['email']        || '—');
+    setText('rv-phone',     formData['phone']        || '—');
+    setText('rv-address',   [formData['curr-address'], formData['curr-city'], formData['curr-state'], formData['curr-zip']].filter(Boolean).join(', ') || '—');
+    setText('rv-emp',       formData['emp-status']   || '—');
+    setText('rv-income',    fmtDollar(formData['monthly-income']) + '/mo');
+    setText('rv-credit',    formData['credit-score'] || '—');
+    setText('rv-debts',     fmtDollar(formData['monthly-debts']) + '/mo');
+  }
+
+  function setText(id, val) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = val || '—';
+  }
+  function fmtDollar(val) {
+    var n = parseFloat(String(val || '').replace(/[$,]/g,''));
+    return isNaN(n) || n === 0 ? '—' : '$' + Math.round(n).toLocaleString();
+  }
+
+  // ── SUBMIT ──
+  window.submitForm = function() {
+    saveStepData();
+    var btn = document.getElementById('submit-btn');
+    btn.textContent = 'Submitting...';
+    btn.disabled = true;
+
+    // TODO: Replace this setTimeout with a real fetch() to your Python backend
+    // fetch('/api/apply', { method: 'POST', body: JSON.stringify(formData), headers: { 'Content-Type': 'application/json' } })
+    setTimeout(function() {
+      document.querySelector('.apply-card').style.display = 'none';
+      document.getElementById('apply-success').classList.add('active');
+      document.querySelector('.apply-header').style.display = 'none';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 800);
+  };
+
+})();
+</script>
+
+</body>
+</html>
