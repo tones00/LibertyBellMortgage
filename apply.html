@@ -1041,6 +1041,38 @@
   initOptionGrid('loantype-grid', 'loanType');
   initOptionGrid('lo-grid', 'loanOfficer');
 
+  // ── PRE-SELECT FROM URL PARAM (?type=fha etc) ──
+  var urlParams = new URLSearchParams(window.location.search);
+  var preType   = urlParams.get('type');
+  if (preType) {
+    var typeMap = {
+      'conventional': { loanType: 'conventional', purpose: 'purchase' },
+      'fha':          { loanType: 'fha',           purpose: 'purchase' },
+      'va':           { loanType: 'va',             purpose: 'purchase' },
+      'jumbo':        { loanType: 'jumbo',          purpose: 'purchase' },
+      'refinance':    { loanType: 'conventional',   purpose: 'refinance' },
+      'cashout':      { loanType: 'conventional',   purpose: 'cashout'  },
+      'investment':   { loanType: 'conventional',   purpose: 'purchase' },
+    };
+    var preset = typeMap[preType];
+    if (preset) {
+      // Select loan type card
+      var ltGrid = document.getElementById('loantype-grid');
+      if (ltGrid) {
+        ltGrid.querySelectorAll('.option-card').forEach(function(c) { c.classList.remove('selected'); });
+        var ltCard = ltGrid.querySelector('[data-value="' + preset.loanType + '"]');
+        if (ltCard) { ltCard.classList.add('selected'); formData.loanType = preset.loanType; }
+      }
+      // Select purpose card
+      var pGrid = document.getElementById('purpose-grid');
+      if (pGrid) {
+        pGrid.querySelectorAll('.option-card').forEach(function(c) { c.classList.remove('selected'); });
+        var pCard = pGrid.querySelector('[data-value="' + preset.purpose + '"]');
+        if (pCard) { pCard.classList.add('selected'); formData.purpose = preset.purpose; }
+      }
+    }
+  }
+
   // ── TOGGLE BUTTONS ──
   function initToggleGroup(groupId, storeKey, onSelect) {
     var group = document.getElementById(groupId);
