@@ -1169,10 +1169,6 @@
     return isNaN(n) || n === 0 ? '—' : '$' + Math.round(n).toLocaleString();
   }
 
-  // ── SUBMIT ──
-  // Uses Formspree for email delivery (free, no backend needed)
-  // Sign up at formspree.io, create a form, and replace FORMSPREE_ID below
-  var FORMSPREE_ID = 'YOUR_FORMSPREE_ID'; // ← replace this
 
   window.submitForm = function() {
     saveStepData();
@@ -1230,20 +1226,21 @@
       return;
     }
 
-    fetch('https://formspree.io/f/' + FORMSPREE_ID, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    fetch('http://127.0.0.1:5000/api/apply', {
+      method: 'POST', 
+      headers: {'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify(payload)
     })
-    .then(function(res) {
-      if (res.ok) { showSuccess(); }
-      else { btn.textContent = 'Error — please try again'; btn.disabled = false; }
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.status === 'recieved') {showSuccess()l }
+      else { btn.textContent = 'Error - please try again'; btn.disabled = false}
     })
-    .catch(function() {
-      btn.textContent = 'Error — please try again';
+    .catch(function() { 
+      btn.textContent = 'Error - please try again';
       btn.disabled = false;
     });
-  };
+    
 
   function showSuccess() {
     document.querySelector('.apply-card').style.display = 'none';
