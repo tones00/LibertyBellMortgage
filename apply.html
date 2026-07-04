@@ -1169,6 +1169,10 @@
     return isNaN(n) || n === 0 ? '—' : '$' + Math.round(n).toLocaleString();
   }
 
+  // ── SUBMIT ──
+  // Uses Formspree for email delivery (free, no backend needed)
+  // Sign up at formspree.io, create a form, and replace FORMSPREE_ID below
+  var FORMSPREE_ID = 'YOUR_FORMSPREE_ID'; // ← replace this
 
   window.submitForm = function() {
     saveStepData();
@@ -1220,27 +1224,21 @@
     };
 
     // If Formspree ID not set yet, just show success (dev mode)
-    if (FORMSPREE_ID === 'YOUR_FORMSPREE_ID') {
-      console.log('Form data (dev mode):', payload);
-      showSuccess();
-      return;
-    }
-
     fetch('http://127.0.0.1:5000/api/apply', {
-      method: 'POST', 
-      headers: {'Content-Type': 'application/json', 'Accept': 'application/json' },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify(payload)
     })
     .then(function(res) { return res.json(); })
     .then(function(data) {
-      if (data.status === 'recieved') {showSuccess()l }
-      else { btn.textContent = 'Error - please try again'; btn.disabled = false}
+      if (data.status === 'received') { showSuccess(); }
+      else { btn.textContent = 'Error — please try again'; btn.disabled = false; }
     })
-    .catch(function() { 
-      btn.textContent = 'Error - please try again';
+    .catch(function() {
+      btn.textContent = 'Error — please try again';
       btn.disabled = false;
     });
-    
+  };
 
   function showSuccess() {
     document.querySelector('.apply-card').style.display = 'none';
