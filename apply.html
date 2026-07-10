@@ -335,13 +335,12 @@
     .review-label { color: var(--slate); }
     .review-value { font-weight: 600; color: var(--navy); text-align: right; }
 
-    /* Success state */
     .apply-success {
       display: none;
       text-align: center;
       padding: 48px 24px;
     }
-    .apply-success.active { display: block; }
+    .apply-success.active { display: block !important; }
     .success-icon {
       width: 72px;
       height: 72px;
@@ -968,19 +967,20 @@
         </p>
       </div>
 
-      <!-- ══ SUCCESS ══ -->
-      <div class="apply-success" id="apply-success">
-        <div class="success-icon">✓</div>
-        <h2 class="success-title">Application Received!</h2>
-        <p class="success-sub">
-          Thank you — your loan officer will review your information and reach out within one business day to discuss your options and next steps.
-        </p>
-        <a href="tel:4083736534" class="btn btn-primary" style="display:inline-flex;margin:0 auto 12px;">📞 Call Us: (408) 373-6534</a>
-        <br/>
-        <a href="index.html" style="font-size:0.85rem;color:var(--slate-light);">← Back to Home</a>
-      </div>
-
     </div><!-- /.apply-card -->
+
+    <!-- ══ SUCCESS ══ -->
+    <div class="apply-success" id="apply-success">
+      <div class="success-icon">✓</div>
+      <h2 class="success-title">Application Received!</h2>
+      <p class="success-sub">
+        Thank you — your loan officer will review your information and reach out within one business day to discuss your options and next steps.
+      </p>
+      <a href="tel:4083736534" class="btn btn-primary" style="display:inline-flex;margin:0 auto 12px;">📞 Call Us: (408) 373-6534</a>
+      <br/>
+      <a href="index.html" style="font-size:0.85rem;color:var(--slate-light);">← Back to Home</a>
+    </div>
+
   </div><!-- /.apply-body -->
 </div><!-- /.apply-wrap -->
 
@@ -1170,10 +1170,6 @@
   }
 
   // ── SUBMIT ──
-  // Uses Formspree for email delivery (free, no backend needed)
-  // Sign up at formspree.io, create a form, and replace FORMSPREE_ID below
-  var FORMSPREE_ID = 'YOUR_FORMSPREE_ID'; // ← replace this
-
   window.submitForm = function() {
     saveStepData();
     var btn = document.getElementById('submit-btn');
@@ -1188,9 +1184,7 @@
     };
 
     var payload = {
-      // Routing info
       loan_officer:   loNames[formData.loanOfficer] || formData.loanOfficer || 'Unspecified',
-      // Loan details
       purpose:        formData.purpose,
       loan_type:      formData.loanType,
       loan_term:      formData['loan-term'],
@@ -1200,7 +1194,6 @@
       property_zip:   formData['prop-zip'],
       property_type:  formData['prop-type'],
       property_use:   formData['prop-use'],
-      // Borrower
       first_name:     formData['first-name'],
       last_name:      formData['last-name'],
       email:          formData['email'],
@@ -1209,7 +1202,6 @@
       address:        [formData['curr-address'], formData['curr-city'], formData['curr-state'], formData['curr-zip']].filter(Boolean).join(', '),
       co_borrower:    formData.coBorrower,
       co_name:        [formData['co-first-name'], formData['co-last-name']].filter(Boolean).join(' '),
-      // Employment
       emp_status:     formData['emp-status'],
       employer:       formData['employer-name'],
       job_title:      formData['job-title'],
@@ -1223,7 +1215,6 @@
       _subject:       'New Loan Application — ' + (formData['first-name'] || '') + ' ' + (formData['last-name'] || '') + ' (' + (loNames[formData.loanOfficer] || 'Unassigned') + ')',
     };
 
-    // If Formspree ID not set yet, just show success (dev mode)
     fetch('http://127.0.0.1:5000/api/apply', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
@@ -1241,9 +1232,12 @@
   };
 
   function showSuccess() {
-    document.querySelector('.apply-card').style.display = 'none';
-    document.getElementById('apply-success').classList.add('active');
-    document.querySelector('.apply-header').style.display = 'none';
+    var card = document.querySelector('.apply-card');
+    var success = document.getElementById('apply-success');
+    var header = document.querySelector('.apply-header');
+    if (card) card.style.display = 'none';
+    if (success) { success.style.display = 'block'; success.classList.add('active'); }
+    if (header) header.style.display = 'none';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
