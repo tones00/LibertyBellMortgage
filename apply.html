@@ -646,7 +646,42 @@
         <div class="form-row thirds">
           <div class="form-field">
             <label>Date of Birth <span class="req">*</span></label>
-            <input type="date" id="dob" />
+            <div style="display:grid;grid-template-columns:2fr 1fr 2fr;gap:6px;">
+              <select id="dob-month">
+                <option value="">Month</option>
+                <option value="01">January</option>
+                <option value="02">February</option>
+                <option value="03">March</option>
+                <option value="04">April</option>
+                <option value="05">May</option>
+                <option value="06">June</option>
+                <option value="07">July</option>
+                <option value="08">August</option>
+                <option value="09">September</option>
+                <option value="10">October</option>
+                <option value="11">November</option>
+                <option value="12">December</option>
+              </select>
+              <select id="dob-day">
+                <option value="">Day</option>
+                <option value="01">1</option><option value="02">2</option><option value="03">3</option>
+                <option value="04">4</option><option value="05">5</option><option value="06">6</option>
+                <option value="07">7</option><option value="08">8</option><option value="09">9</option>
+                <option value="10">10</option><option value="11">11</option><option value="12">12</option>
+                <option value="13">13</option><option value="14">14</option><option value="15">15</option>
+                <option value="16">16</option><option value="17">17</option><option value="18">18</option>
+                <option value="19">19</option><option value="20">20</option><option value="21">21</option>
+                <option value="22">22</option><option value="23">23</option><option value="24">24</option>
+                <option value="25">25</option><option value="26">26</option><option value="27">27</option>
+                <option value="28">28</option><option value="29">29</option><option value="30">30</option>
+                <option value="31">31</option>
+              </select>
+              <select id="dob-year">
+                <option value="">Year</option>
+              </select>
+            </div>
+            <!-- hidden field that combines the three for form submission -->
+            <input type="hidden" id="dob" />
           </div>
           <div class="form-field">
             <label>Marital Status</label>
@@ -992,9 +1027,116 @@
 
   var stepNames = ['Loan Type', 'Property Info', 'Your Info', 'Employment', 'Review'];
 
+  // ── VALIDATION ──
+  var requiredByStep = {
+    2: ['prop-zip', 'prop-type', 'prop-use', 'prop-value', 'down-payment'],
+    3: ['first-name', 'last-name', 'email', 'phone', 'dob', 'curr-address', 'curr-city', 'curr-zip'],
+    4: ['emp-status', 'monthly-income', 'credit-score']
+  };
+
+  function validateStep(step) {
+    var fields = requiredByStep[step];
+    if (!fields) return true; // steps 1 and 5 have no required text fields
+    var valid = true;
+    fields.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      var val = el.value.trim();
+      if (!val || val === '') {
+        el.style.borderColor = '#e53e3e';
+        el.style.boxShadow = '0 0 0 3px rgba(229,62,62,0.15)';
+        valid = false;
+        // scroll to first error
+        if (valid === false && el === document.querySelector('[style*="e53e3e"]')) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      } else {
+        el.style.borderColor = '';
+        el.style.boxShadow = '';
+      }
+    });
+    if (!valid) {
+      showStepError(step);
+    }
+    // Extra check for DOB dropdowns on step 3
+    if (step === 3) {
+      var dobM = document.getElementById('dob-month');
+      var dobD = document.getElementById('dob-day');
+      var dobY = document.getElementById('dob-year');
+      if (!dobM?.value || !dobD?.value || !dobY?.value) {
+        if (dobM) dobM.style.borderColor = '#e53e3e';
+        if (dobD) dobD.style.borderColor = '#e53e3e';
+        if (dobY) dobY.style.borderColor = '#e53e3e';
+        valid = false;
+        if (valid === false) showStepError(step);
+      }
+      // Email format check
+      var emailEl = document.getElementById('email');
+      if (emailEl && emailEl.value.trim()) {
+        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(emailEl.value.trim())) {
+          emailEl.style.borderColor = '#e53e3e';
+          emailEl.style.boxShadow = '0 0 0 3px rgba(229,62,62,0.15)';
+          // Show specific email error
+          var existing = document.querySelector('.step-error-msg');
+          if (existing) existing.remove();
+          var msg = document.createElement('p');
+          msg.className = 'step-error-msg';
+          msg.textContent = 'Please enter a valid email address (e.g. name@example.com)';
+          msg.style.cssText = 'color:#e53e3e;font-size:0.82rem;font-weight:600;margin-top:12px;text-align:right;';
+          var nav = document.querySelector('#step-3 .apply-nav');
+          if (nav) nav.appendChild(msg);
+          setTimeout(function() { if (msg.parentNode) msg.remove(); }, 4000);
+          valid = false;
+        }
+      }
+      // Phone format check — US numbers only
+      var phoneEl = document.getElementById('phone');
+      if (phoneEl && phoneEl.value.trim()) {
+        var phoneRaw = phoneEl.value.replace(/\D/g, '');
+        if (phoneRaw.length !== 10 && !(phoneRaw.length === 11 && phoneRaw[0] === '1')) {
+          phoneEl.style.borderColor = '#e53e3e';
+          phoneEl.style.boxShadow = '0 0 0 3px rgba(229,62,62,0.15)';
+          var existingP = document.querySelector('.step-error-msg');
+          if (existingP) existingP.remove();
+          var msgP = document.createElement('p');
+          msgP.className = 'step-error-msg';
+          msgP.textContent = 'Please enter a valid US phone number (e.g. (408) 555-0123)';
+          msgP.style.cssText = 'color:#e53e3e;font-size:0.82rem;font-weight:600;margin-top:12px;text-align:right;';
+          var navP = document.querySelector('#step-3 .apply-nav');
+          if (navP) navP.appendChild(msgP);
+          setTimeout(function() { if (msgP.parentNode) msgP.remove(); }, 4000);
+          valid = false;
+        }
+      }
+    }
+    return valid;
+  }
+
+  function showStepError(step) {
+    var existing = document.querySelector('.step-error-msg');
+    if (existing) existing.remove();
+    var msg = document.createElement('p');
+    msg.className = 'step-error-msg';
+    msg.textContent = 'Please fill in all required fields before continuing.';
+    msg.style.cssText = 'color:#e53e3e;font-size:0.82rem;font-weight:600;margin-top:12px;text-align:right;';
+    var nav = document.querySelector('#step-' + step + ' .apply-nav');
+    if (nav) nav.appendChild(msg);
+    setTimeout(function() { if (msg.parentNode) msg.remove(); }, 4000);
+  }
+
+  // Clear error styling on input
+  document.querySelectorAll('input, select').forEach(function(el) {
+    el.addEventListener('input', function() {
+      el.style.borderColor = '';
+      el.style.boxShadow = '';
+    });
+  });
+
   // ── STEP NAVIGATION ──
   window.nextStep = function() {
     if (currentStep < totalSteps) {
+      if (!validateStep(currentStep)) return; // block if invalid
       saveStepData();
       if (currentStep === totalSteps - 1) populateReview();
       goToStep(currentStep + 1);
@@ -1240,6 +1382,74 @@
     if (header) header.style.display = 'none';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+
+  // ── PHONE AUTO-FORMAT ──
+  var phoneInput = document.getElementById('phone');
+  if (phoneInput) {
+    phoneInput.addEventListener('input', function() {
+      var digits = phoneInput.value.replace(/\D/g, '').slice(0, 10);
+      var formatted = '';
+      if (digits.length > 0) formatted = '(' + digits.slice(0, 3);
+      if (digits.length >= 4) formatted += ') ' + digits.slice(3, 6);
+      if (digits.length >= 7) formatted += '-' + digits.slice(6, 10);
+      phoneInput.value = formatted;
+    });
+  }
+
+  // ── DOB DROPDOWNS ──
+  // Populate year dropdown from current year back to 1920
+  var yearSelect = document.getElementById('dob-year');
+  if (yearSelect) {
+    var currentYear = new Date().getFullYear();
+    for (var y = currentYear - 18; y >= 1920; y--) {
+      var opt = document.createElement('option');
+      opt.value = y;
+      opt.textContent = y;
+      yearSelect.appendChild(opt);
+    }
+  }
+
+  function updateDob() {
+    var m = document.getElementById('dob-month')?.value;
+    var d = document.getElementById('dob-day')?.value;
+    var y = document.getElementById('dob-year')?.value;
+    var hidden = document.getElementById('dob');
+    if (hidden) hidden.value = (m && d && y) ? y + '-' + m + '-' + d : '';
+  }
+
+  ['dob-month', 'dob-day', 'dob-year'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('change', updateDob);
+  });
+
+  // ── LIVE COMMA FORMATTING ──
+  var dollarFields = [
+    'prop-value', 'down-payment',
+    'monthly-income', 'other-income',
+    'monthly-debts', 'bank-assets', 'invest-assets'
+  ];
+
+  function formatCommas(el) {
+    var cursorPos = el.selectionStart;
+    var raw = el.value.replace(/,/g, '');
+    // only digits
+    raw = raw.replace(/[^0-9]/g, '');
+    if (raw === '') { el.value = ''; return; }
+    var formatted = parseInt(raw, 10).toLocaleString();
+    // figure out how many commas were added before cursor
+    var oldCommasBefore = (el.value.slice(0, cursorPos).match(/,/g) || []).length;
+    el.value = formatted;
+    var newCommasBefore = (formatted.slice(0, cursorPos).match(/,/g) || []).length;
+    var newPos = cursorPos + (newCommasBefore - oldCommasBefore);
+    el.setSelectionRange(newPos, newPos);
+  }
+
+  dollarFields.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', function() { formatCommas(el); });
+    el.addEventListener('blur', function() { formatCommas(el); });
+  });
 
 })();
 </script>
